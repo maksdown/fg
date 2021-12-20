@@ -1,201 +1,66 @@
 ﻿using System;
+using System.Collections.Generic;
+using Telegram.Bot;
+using Telegram.Bot.Args;
+using Telegram.Bot.Types.ReplyMarkups;
 
-namespace dotenet_core
+namespace DushnilkaBot
 {
 	class Program
 	{
-		static int winrate;
-		static int bal=1000;
-		static string rpl;
-		static int parserpl;
-		static int win;
-		static Random rd = new Random();
+		private static string token { get; set; } = "2076772894:AAGxSSoPwEidxLEyqE2kHl4ZuqWVOB6meMc";
+		private static TelegramBotClient client;
 		static void Main(string[] args)
 		{
-			
+			client = new TelegramBotClient(token);
+			client.StartReceiving();
+			client.OnMessage += OnMessaheHandler;
+			Console.ReadLine();
+			client.StopReceiving();
+		}
 
-			int day = 1;
-			Console.WriteLine("Эмулятор казино! День: "+day+"\n");
-			MainMenu();
-			static void MainMenu()
+		private static async void OnMessaheHandler(object sender, MessageEventArgs e)
+		{
+			var msg = e.Message;
+			if (msg.Text != null)
 			{
-				Console.WriteLine("Главное меню\n1. Казино\n2. Профиль\n3. Пополнить баланс");
-				rpl = Console.ReadLine();
-				bool result = int.TryParse(rpl, out parserpl);
-				if (result)
+				Console.WriteLine($"Сообщение: {msg.Text}");
+				switch (msg.Text)
 				{
-					parserpl = int.Parse(rpl);
-					switch (parserpl)
-					{
-						case 1:
-							Menu();
-							break;
-						case 2:
-							Profile();
-							break;
-						case 3:
-							Donate();
-							break;
-						default:
-							Console.WriteLine("Введено некорректное значение!");
-							MainMenu();
-							break;
-					}
-				}
-				else
-				{
-					Console.WriteLine("Введено некорректное значение!");
-					MainMenu();
+					case "Стикеры":
+						var vid = await client.SendStickerAsync(
+							chatId: msg.Chat.Id,
+							sticker: "https://cdn.tlgrm.app/stickers/c62/4a8/c624a88d-1fe3-403a-b41a-3cdb9bf05b8a/192/1.webp",
+							replyMarkup: GetButtons()) ;
+						break;
+					case "Ты крокозябра":
+						var obz = await client.SendTextMessageAsync(
+							chatId: msg.Chat.Id,
+							text: "Сам ты такой",
+							replyMarkup: GetButtons());
+						await client.SendStickerAsync(
+							chatId: msg.Chat.Id,
+							sticker: "https://cdn.tlgrm.app/stickers/9df/619/9df6199a-ff6a-338d-9f74-625b0a647045/192/12.webp",
+							replyMarkup: GetButtons());
+						break;
+
+					default:
+						break;
 				}
 			}
-			static void Menu()
+		}
+
+		private static IReplyMarkup GetButtons()
+		{
+			return new ReplyKeyboardMarkup
 			{
-				Console.WriteLine("Выберете игру (напишите номер в консоль) \n1. 50/50\n0. Назад");
-				rpl = Console.ReadLine();
-				bool result = int.TryParse(rpl, out parserpl);
-				if (result)
+				Keyboard = new List<List<KeyboardButton>>
 				{
-					parserpl = int.Parse(rpl);
-					switch (parserpl)
-					{
-						case 1:
-							game1();
-							break;
-						case 0:
-							MainMenu();
-							break;
-						default:
-							Console.WriteLine("Введено некорректное значение!");
-							Menu();
-							break;
-					}
+					new List<KeyboardButton>{ new KeyboardButton {Text = "Стикеры" } },
+					new List<KeyboardButton>{ new KeyboardButton {Text = "Ты крокозябра" } },
 				}
-				else
-				{
-					Console.WriteLine("Введено некорректное значение!");
-					Menu();
-				}
+			};
 
-				static void game1()
-				{
-					int rdcase = rd.Next(2);
-					Console.Write("Введите ставку:\t");
-					rpl = Console.ReadLine();
-					int bet = int.Parse(rpl);
-
-					bool result = int.TryParse(rpl, out parserpl);
-					if (result)
-					{
-						parserpl = int.Parse(rpl);
-						if (parserpl <= bal)
-						{
-						}
-						else
-						{
-							Console.WriteLine("Вы не можете поставить больше, чем имеете!");
-							game1();
-						}
-					}
-					else
-					{
-						Console.WriteLine("Введено некорректное значение!");
-						Menu();
-					}
-
-					switch (rdcase)
-					{
-						case 0:
-							Console.WriteLine("Вы проиграли :(");
-							winrate--;
-							bal = bal - bet;
-							//Console.WriteLine(winrate);
-							Menu();
-							break;
-						case 1:
-							Console.WriteLine("Вы выйграли!");
-							winrate++;
-							win++;
-							bal = bal + bet;
-							//Console.WriteLine(winrate);
-							Menu();
-							break;
-					}
-				}
-			}
-				static void Profile()
-				{
-					Console.WriteLine("Баланс: "+bal+"\nКол-во побед: "+win+"\n");
-					Console.WriteLine("1. Пополнить баланс\n0. Назад");
-					rpl = Console.ReadLine();
-					bool result = int.TryParse(rpl, out parserpl);
-					if (result)
-					{
-						parserpl = int.Parse(rpl);
-						switch (parserpl)
-						{
-							case 1:
-							Donate();
-								break;
-							case 0:
-								MainMenu();
-								break;
-							default:
-								Console.WriteLine("Введено некорректное значение!");
-								Menu();
-								break;
-						}
-					}
-					else
-					{
-						Console.WriteLine("Введено некорректное значение!");
-						Menu();
-					}
-				}
-			static void Donate()
-			{
-				Console.WriteLine("Способ пополнения баланса\n1. Промо-код\n2. Платёжная система (Никогда не выйдет)\n0. Назад");
-				rpl = Console.ReadLine();
-				bool result = int.TryParse(rpl, out parserpl);
-				if (result)
-				{
-					parserpl = int.Parse(rpl);
-					switch (parserpl)
-					{
-						case 1:
-							Console.WriteLine("Введите промо-код:");
-							string a =Console.ReadLine();
-							if (a == "3108")
-							{
-								Console.WriteLine("Баланс пополнен на 5000 рублей!");
-								bal = bal + 5000;
-								Donate();
-							}
-							else
-							{
-								Console.WriteLine("Промо-код не действителен!");
-								Donate();
-							}
-							break;
-						case 0:
-							MainMenu();
-							break;
-						case 2:
-								Console.WriteLine("мшк фреде");
-								Donate();
-							break;
-						default:
-							Console.WriteLine("Введено некорректное значение!");
-							Donate();
-							break;
-					}
-				}
-				else
-				{
-					Console.WriteLine("Введено некорректное значение!");
-					Menu();
-				}
-			}
-			
-		}		
+		}
 	}
 }
